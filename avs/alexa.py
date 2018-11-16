@@ -25,6 +25,7 @@ from avs.mic import Audio
 
 from avs.interface.alerts import Alerts
 from avs.interface.audio_player import AudioPlayer
+from avs.interface.settings import Settings
 from avs.interface.speaker import Speaker
 from avs.interface.speech_recognizer import SpeechRecognizer
 from avs.interface.speech_synthesizer import SpeechSynthesizer
@@ -40,7 +41,7 @@ class AlexaStateListener(object):
         pass
 
     def on_ready(self):
-        logger.info('on_ready')
+        logger.info('on_ready desuyo')
 
     def on_disconnected(self):
         logger.info('on_disconnected')
@@ -69,6 +70,7 @@ class Alexa(object):
         self.Speaker = Speaker(self)
         self.Alerts = Alerts(self)
         self.System = System(self)
+        self.Settings = Settings(self)
 
         self.state_listener = AlexaStateListener()
 
@@ -317,7 +319,7 @@ class Alexa(object):
     def context(self):
         # return [self.SpeechRecognizer.context, self.SpeechSynthesizer.context,
         #                    self.AudioPlayer.context, self.Speaker.context, self.Alerts.context]
-        return [self.SpeechSynthesizer.context, self.Speaker.context, self.AudioPlayer.context, self.Alerts.context]
+        return [self.SpeechSynthesizer.context, self.Speaker.context, self.AudioPlayer.context, self.Alerts.context, self.Settings.context]
 
     @property
     def token(self):
