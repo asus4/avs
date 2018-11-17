@@ -41,7 +41,7 @@ class AlexaStateListener(object):
         pass
 
     def on_ready(self):
-        logger.info('on_ready desuyo')
+        logger.info('on_ready')
 
     def on_disconnected(self):
         logger.info('on_disconnected')
