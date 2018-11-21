@@ -32,6 +32,7 @@ from avs.interface.speech_synthesizer import SpeechSynthesizer
 from avs.interface.system import System
 import avs.config
 import avs.auth
+import avs.capabilities
 
 logger = logging.getLogger(__name__)
 
@@ -96,6 +97,10 @@ class Alexa(object):
     def start(self):
         self.done = False
 
+        # Set capabilities before starting
+        avs.capabilities.send_retries(self.token)
+
+        # Start http2 connection
         t = threading.Thread(target=self.run)
         t.daemon = True
         t.start()

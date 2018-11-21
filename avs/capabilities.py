@@ -1,10 +1,9 @@
 import json
 import logging
-import sys
 import time
-
 import requests
-# from hyper import HTTPConnection
+
+logger = logging.getLogger(__name__)
 
 capabilities = {
     'envelopeVersion': '20160207',
@@ -92,7 +91,7 @@ capabilities = {
     ]
 }
 
-def send(config):
+def send(token):
     '''
     Send config
     https://developer.amazon.com/docs/alexa-voice-service/capabilities-api.html
@@ -101,40 +100,26 @@ def send(config):
     logger = logging.getLogger(__name__)
 
     endpoint = 'https://api.amazonalexa.com/v1/devices/@self/capabilities'
-    # endpoint = 'https://api.amazonalexa.com/v1/devices/{}/capabilities'.format(config['client_id'])
     
-    # option: NO space 
     jsonStr = json.dumps(capabilities, separators=(',',':'))
-    # data = bytes(jsonStr, 'utf-8')
     data = jsonStr.encode('utf-8')
+
     headers = {
         'Content-Type': 'application/json',
         'Content-Length': str(len(data)),
-        # 'x-amz-access-token': 'Bearer {}'.format(config['access_token']),
-        'Authorization': 'Bearer {}'.format(config['access_token']),
-        'Accept': '',
-        'Expect': '',
+        'Authorization': 'Bearer {}'.format(token),
     }
-    # print data
-    # print headers
-    # print config
-    logger.info('send request')
-    logger.info('headers: %s', headers)
-    logger.info('data: %s', data)
+    logger.debug('headers: %s', headers)
+    logger.debug('data: %s', data)
 
-    res = requests.post(endpoint, json=data, headers=headers)
-    logger.info(res)
-    logger.warning(res.text)
+    res = requests.put(endpoint, data=data, headers=headers)
     return res.status_code
 
-def send_retries(config, retry_count):
-    logger = logging.getLogger(__name__)
+def send_retries(token, retry_count = 0):
 
-    code = send(config)
-    logger.info(code)
-
+    code = send(token)
     if code is 204:
-        logger.info('Sucseed')
+        logger.info('Sucseed setting capabilities')
         return
 
     retry_count = retry_count + 1
@@ -143,9 +128,9 @@ def send_retries(config, retry_count):
         return
     
     wait_time = retry_count * retry_count 
-    logger.info('Retry %d times wait for %s', retry_count, wait_time)
+    logger.info('Got %d, Retrying %d times wait for %s',code, retry_count, wait_time)
     time.sleep(wait_time)
-    send_retries(config, retry_count)
+    send_retries(token, retry_count)
 
 
 
@@ -153,4 +138,5 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
 
     import config
-    send_retries(config.load(), 0)
+    conf = config.load()
+    send_retries(conf['access_token'], 0)

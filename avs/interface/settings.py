@@ -11,20 +11,18 @@ class Settings(object):
     
     def SetLocale(self, locale):
         event = {
-            "event": {
-                "header": {
-                    "namespace": "Settings",
-                    "name": "SettingsUpdated",
-                    "messageId": uuid.uuid4().hex
-                },
-                "payload": {
-                    "settings": [
-                        {
-                            "key": "locale",
-                            "value": locale
-                        }
-                    ]
-                }
+            "header": {
+                "namespace": "Settings",
+                "name": "SettingsUpdated",
+                "messageId": uuid.uuid4().hex
+            },
+            "payload": {
+                "settings": [
+                    {
+                        "key": "locale",
+                        "value": locale
+                    }
+                ]
             }
         }
         self.alexa.send_event(event)
