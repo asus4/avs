@@ -11,11 +11,10 @@ import avs.config
 
 
 def get_user_code(config):
-
     """
     Step 2: in curl command
-    curl -k -d 'response_type=device_code&client_id={{client_id}}&scope=alexa%3Aall&scope_data=%7B%22alexa%3Aall%22%3A%7B%22productID%22%3A%22Speaker%22,%22productInstanceAttributes%22%3A%7B%22deviceSerialNumber%22%3A%2212345%22%7D%7D%7D' -H "Content-Type: application/x-www-form-urlencoded" -X POST https://api.amazon.com/auth/O2/create/codepair
     """
+
     endpoint = 'https://api.amazon.com/auth/O2/create/codepair'
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -36,8 +35,32 @@ def get_user_code(config):
         'scope_data': scope_data,
     }
     r = requests.post(endpoint, data=payload, headers=headers)
-    return r.json()
+    if r.status_code == requests.codes.ok:
+        return r.json()
+    else:
+        r.raise_for_status()
 
+def get_device_token(code_response):
+    """
+    Step 2: Request the device token 
+    """
+
+    endpoint = 'https://api.amazon.com/auth/O2/token'
+    headers = {
+        'Host': 'api.amazon.com',
+        'Content-Type': 'application/x-www-form-urlencoded'
+    }
+    payload = {
+        'grant_type': 'device_code',
+        'device_code': code_response['device_code'],
+        'user_code': code_response['user_code']
+    }
+    r = requests.post(endpoint, data=payload, headers=headers)
+    if r.status_code == requests.codes.ok:
+        return r.json()
+    else:
+        print('status: {} {}'.format(r.status_code, r.text))
+        return None
 
 def auth(config, output):
     """
@@ -47,8 +70,17 @@ def auth(config, output):
 
     config = avs.config.load(config) if config else {}
 
-    res = get_user_code(config)
-    print(res)
+    code_res = get_user_code(config)
+    print(code_res)
+    print('Open {} and type code \"{}\"'.format(code_res['verification_uri'], code_res['user_code']))
+
+    while True:
+        time.sleep(10)
+        token_res = get_device_token(code_res)
+        print(token_res)
+        if token_res is not None:
+            break
+
 
 @click.command()
 @click.option('--config', '-c', help='configuration json file with product_id, client_id and client_secret')
