@@ -77,9 +77,19 @@ def auth(config, output):
     while True:
         time.sleep(10)
         token_res = get_device_token(code_res)
-        print(token_res)
         if token_res is not None:
             break
+
+    # Succeed to login
+    print(json.dumps(token_res, indent=4))
+
+    config['access_token'] = token_res['access_token']
+    config['refresh_token'] = token_res['refresh_token']
+
+    expiry_time = datetime.datetime.utcnow() + datetime.timedelta(seconds=token_res['expires_in'])
+    config['expiry'] = expiry_time.strftime('%a %b %d %H:%M:%S %Y')
+
+    avs.config.save(config, configfile=output)
 
 
 @click.command()
