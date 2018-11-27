@@ -30,7 +30,7 @@ class Player(object):
             print('Playing {}'.format(self.audio))
 
             master, slave = os.openpty()
-            self.process = subprocess.Popen(['mpg123', '-q', '-C', self.audio], stdin=master)
+            self.process = subprocess.Popen(['mpg123', '-q', '-C', '-b', '2048', self.audio], stdin=master)
             self.tty = slave
 
             self.process.wait()
