@@ -112,20 +112,24 @@ def send(token):
     logger.debug('headers: %s', headers)
     logger.debug('data: %s', data)
 
-    res = requests.put(endpoint, data=data, headers=headers)
-    return res.status_code
+    try:
+        res = requests.put(endpoint, data=data, headers=headers)
+        return res.status_code
+    except Exception as e:
+        logger.exception(e)
+        return False
 
 def send_retries(token, retry_count = 0):
 
     code = send(token)
     if code is 204:
         logger.info('Sucseed setting capabilities')
-        return
+        return code
 
     retry_count = retry_count + 1
     if retry_count > 3:
         logger.warn('giveup to retry')
-        return
+        return code
     
     wait_time = retry_count * retry_count 
     logger.info('Got %d, Retrying %d times wait for %s',code, retry_count, wait_time)

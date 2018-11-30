@@ -98,7 +98,13 @@ class Alexa(object):
         self.done = False
 
         # Set capabilities before starting
-        avs.capabilities.send_retries(self.token)
+        code = avs.capabilities.send_retries(self.token)
+        logger.info('code is {}'.format(code))
+        if code is not 204:
+            logger.warn('capbilities failed')
+            self.state_listener.on_disconnected()
+            self.done = True
+            return
 
         # Start http2 connection
         t = threading.Thread(target=self.run)
